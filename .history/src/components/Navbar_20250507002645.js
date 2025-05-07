@@ -5,8 +5,7 @@ import logo from '../assets/nav.png';
 import '../styles/Navbar.css';
 
 const Navbar = () => {
-  // Call useWallet at the top level of the component
-  const { walletAddress, connect, disconnect, isLoading, isConnecting, error, account } = useWallet(); 
+  const { walletAddress, connect, disconnect, isLoading, isConnecting, error, account } = useWallet();
 
   console.log("[Navbar] Rendering. WalletAddress:", walletAddress, "isLoading:", isLoading, "isConnecting:", isConnecting, "Error:", error, "Account:", account);
 
@@ -22,9 +21,8 @@ const Navbar = () => {
   };
 
   const handleDisconnect = () => {
-    // disconnect is now directly available from the top-level useWallet() call
     if (disconnect) {
-      console.log("[Navbar] Calling disconnect function (placeholder)");
+      console.log("[Navbar] Calling disconnect function");
       disconnect();
     } else {
       console.error("[Navbar] Disconnect function not available.");

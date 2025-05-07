@@ -5,8 +5,7 @@ import logo from '../assets/nav.png';
 import '../styles/Navbar.css';
 
 const Navbar = () => {
-  // Call useWallet at the top level of the component
-  const { walletAddress, connect, disconnect, isLoading, isConnecting, error, account } = useWallet(); 
+  const { walletAddress, connect, isLoading, isConnecting, error, account } = useWallet(); // Matched the WalletProvider_rollback.js context values
 
   console.log("[Navbar] Rendering. WalletAddress:", walletAddress, "isLoading:", isLoading, "isConnecting:", isConnecting, "Error:", error, "Account:", account);
 
@@ -21,8 +20,9 @@ const Navbar = () => {
     }
   };
 
+  // Using a placeholder disconnect from the rollback version
   const handleDisconnect = () => {
-    // disconnect is now directly available from the top-level useWallet() call
+    const { disconnect } = useWallet(); // Get it fresh in case of re-render
     if (disconnect) {
       console.log("[Navbar] Calling disconnect function (placeholder)");
       disconnect();
@@ -42,11 +42,12 @@ const Navbar = () => {
         {!isConnecting && !isLoading && !error && walletAddress && (
           <>
             <span className="wallet-address-display">{walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</span>
+            {/* Disconnect button might not be fully functional with placeholder disconnect */}
             <button 
               className="connect-button disconnect-button" 
               onClick={handleDisconnect} 
             >
-              Disconnect
+              Disconnect (Placeholder)
             </button>
           </>
         )}

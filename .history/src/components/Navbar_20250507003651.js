@@ -46,7 +46,7 @@ const Navbar = () => {
               className="connect-button disconnect-button" 
               onClick={handleDisconnect} 
             >
-              Disconnect
+              Disconnect (Placeholder)
             </button>
           </>
         )}
