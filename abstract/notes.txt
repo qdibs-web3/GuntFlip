@@ -1,0 +1,6 @@
+Deploying contracts with the account: 0xED946D2F962cF5207E209CE0F16b629A293d0A8F
+Account balance: 5000034474626538965
+MockERC20 (Payment Token) deployed to: 0xec57694F014e9a273fE3e37B2072DbF574e4A1e7
+CoinFlip contract deployed to: 0x80bEA254a9d1BA5d717c4818667864D0C0FDF0Ae
+Minting 200.0 TWT to the CoinFlip contract for initial liquidity...
+Successfully funded CoinFlip contract with initial TWT.
