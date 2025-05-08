@@ -2,11 +2,11 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useWallet } from "../context/WalletProvider";
 import { createPublicClient, http, createWalletClient, custom, parseEther, formatEther } from "viem";
 import { COINFLIP_CONTRACT_ADDRESS, abstractTestnetChain } from "../config";
-import CoinFlipETHABI from "../abis/CoinFlipETH.json";
-import coinImage from "../assets/heads.png";
+import CoinFlipETHABI from "../abis/CoinFlipETH.abi.json";
+import coinImage from "../assets/coin-image.png";
 import headsImage from "../assets/heads.png";
 import tailsImage from "../assets/tails.png";
-import "../styles/CoinFlipPage.css"; // Added CSS import
+import "../styles/CoinFlip.css"; // Added CSS import
 
 const CoinFlipPage = () => {
   const { walletAddress, account, isConnecting, isLoading: isWalletLoading, error: walletError, connect, disconnect } = useWallet();

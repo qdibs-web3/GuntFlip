@@ -6,7 +6,7 @@ import CoinFlipETHABI from "../abis/CoinFlipETH.json";
 import coinImage from "../assets/heads.png";
 import headsImage from "../assets/heads.png";
 import tailsImage from "../assets/tails.png";
-import "../styles/CoinFlipPage.css"; // Added CSS import
+import "../styles/CoinFlip.css"; // Added CSS import
 
 const CoinFlipPage = () => {
   const { walletAddress, account, isConnecting, isLoading: isWalletLoading, error: walletError, connect, disconnect } = useWallet();

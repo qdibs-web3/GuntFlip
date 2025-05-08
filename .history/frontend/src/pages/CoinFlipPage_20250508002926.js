@@ -2,29 +2,30 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useWallet } from "../context/WalletProvider";
 import { createPublicClient, http, createWalletClient, custom, parseEther, formatEther } from "viem";
 import { COINFLIP_CONTRACT_ADDRESS, abstractTestnetChain } from "../config";
-import CoinFlipETHABI from "../abis/CoinFlipETH.json";
-import coinImage from "../assets/heads.png";
+import CoinFlipETHABI from "../abis/CoinFlipETH.json"; // Assuming you renamed or replaced CoinFlip.json
+import coinImage from "../assets/heads.png"; // Assuming you have this image
 import headsImage from "../assets/heads.png";
 import tailsImage from "../assets/tails.png";
-import "../styles/CoinFlipPage.css"; // Added CSS import
+import './styles/CoinFlip.css';
+
 
 const CoinFlipPage = () => {
   const { walletAddress, account, isConnecting, isLoading: isWalletLoading, error: walletError, connect, disconnect } = useWallet();
-  const [selectedSide, setSelectedSide] = useState(null);
-  const [wager, setWager] = useState("0.001");
+  const [selectedSide, setSelectedSide] = useState(null); // "heads" or "tails"
+  const [wager, setWager] = useState("0.001"); // Default wager in ETH
   const [isFlipping, setIsFlipping] = useState(false);
-  const [flipResult, setFlipResult] = useState(null);
+  const [flipResult, setFlipResult] = useState(null); // { outcome: "win"/"loss", side: "heads"/"tails" }
   const [error, setError] = useState("");
   const [ethBalance, setEthBalance] = useState("0");
   const [gameHistory, setGameHistory] = useState([]);
 
-  const presetWagers = ["0.001", "0.005", "0.01"]; // Preset wager options
-
+  // Viem public client for reading data
   const publicClient = createPublicClient({
     chain: abstractTestnetChain,
-    transport: http(),
+    transport: http(), // Uses the proxy from package.json for local dev
   });
 
+  // Function to get Viem wallet client for writing transactions
   const getWalletClient = useCallback(async () => {
     if (!account || !account.connector) {
       console.error("Wallet account or connector not available from AGW.");
@@ -39,7 +40,7 @@ const CoinFlipPage = () => {
         return null;
       }
       return createWalletClient({
-        account: account.address,
+        account: account.address, 
         chain: abstractTestnetChain,
         transport: custom(provider),
       });
@@ -50,6 +51,7 @@ const CoinFlipPage = () => {
     }
   }, [account]);
 
+  // Define fetchEthBalance using useCallback
   const fetchEthBalance = useCallback(async () => {
     if (walletAddress && publicClient) {
       try {
@@ -62,18 +64,13 @@ const CoinFlipPage = () => {
     }
   }, [walletAddress, publicClient]);
 
+  // Define fetchGameHistory using useCallback
   const fetchGameHistory = useCallback(async () => {
     if (!publicClient || !walletAddress) return;
     try {
-      // Correctly access the ABI array using .abi
-      const gameSettledEventAbi = CoinFlipETHABI.abi.find(item => item.name === "GameSettled" && item.type === "event");
-      if (!gameSettledEventAbi) {
-        console.error("GameSettled event ABI not found.");
-        return;
-      }
       const logs = await publicClient.getLogs({
         address: COINFLIP_CONTRACT_ADDRESS,
-        event: gameSettledEventAbi,
+        event: CoinFlipETHABI.find(item => item.name === "GameSettled" && item.type === "event"),
         args: {
           player: walletAddress,
         },
@@ -91,34 +88,38 @@ const CoinFlipPage = () => {
       setGameHistory(history.slice(0, 10));
     } catch (err) {
       console.error("Error fetching game history:", err);
+      // setError("Could not fetch game history.");
     }
   }, [publicClient, walletAddress]);
 
+  // useEffect for fetching initial ETH balance
   useEffect(() => {
     fetchEthBalance();
   }, [fetchEthBalance]);
 
+  // useEffect for fetching initial game history and setting up interval
   useEffect(() => {
     fetchGameHistory();
     const interval = setInterval(fetchGameHistory, 30000);
     return () => clearInterval(interval);
   }, [fetchGameHistory]);
 
+
   const handleDegen = async () => {
     setError("");
     setFlipResult(null);
     if (!walletAddress) return setError("Connect wallet first.");
     if (!selectedSide) return setError("Select heads or tails.");
-
+    
     let minWagerEth, maxWagerEth;
     try {
-      minWagerEth = formatEther(await publicClient.readContract({ address: COINFLIP_CONTRACT_ADDRESS, abi: CoinFlipETHABI.abi, functionName: 'minWager' }));
-      maxWagerEth = formatEther(await publicClient.readContract({ address: COINFLIP_CONTRACT_ADDRESS, abi: CoinFlipETHABI.abi, functionName: 'maxWager' }));
+      minWagerEth = formatEther(await publicClient.readContract({ address: COINFLIP_CONTRACT_ADDRESS, abi: CoinFlipETHABI, functionName: 'minWager' }));
+      maxWagerEth = formatEther(await publicClient.readContract({ address: COINFLIP_CONTRACT_ADDRESS, abi: CoinFlipETHABI, functionName: 'maxWager' }));
     } catch (e) {
       console.error("Could not fetch wager limits", e);
       setError("Could not fetch wager limits. Using defaults.");
-      minWagerEth = "0.001";
-      maxWagerEth = "0.1";
+      minWagerEth = "0.001"; // Fallback
+      maxWagerEth = "0.1";   // Fallback
     }
 
     if (!wager || parseFloat(wager) < parseFloat(minWagerEth) || parseFloat(wager) > parseFloat(maxWagerEth)) {
@@ -126,34 +127,34 @@ const CoinFlipPage = () => {
     }
 
     const walletClient = await getWalletClient();
-    if (!walletClient) return;
+    if (!walletClient) return; 
 
     setIsFlipping(true);
 
     try {
       const wagerInWei = parseEther(wager);
-      const choiceAsNumber = selectedSide === "heads" ? 0 : 1;
+      const choiceAsNumber = selectedSide === "heads" ? 0 : 1; // 0 for Heads, 1 for Tails in contract
 
       console.log(`Flipping with ${wager} ETH for ${selectedSide}...`);
       const flipTxHash = await walletClient.writeContract({
         address: COINFLIP_CONTRACT_ADDRESS,
-        abi: CoinFlipETHABI.abi, // Correctly access the ABI array
+        abi: CoinFlipETHABI,
         functionName: "flip",
         args: [choiceAsNumber],
-        value: wagerInWei,
-        account: walletClient.account,
+        value: wagerInWei, // Send ETH with the transaction
+        account: walletClient.account, 
       });
 
       console.log("Flip transaction sent:", flipTxHash);
       const receipt = await publicClient.waitForTransactionReceipt({ hash: flipTxHash });
       console.log("Flip transaction confirmed:", receipt);
 
+      // Find the GameSettled event from the transaction receipt
       const gameSettledEvent = receipt.logs
         .map(log => {
           try {
-            // Correctly access the ABI array for decoding
             return publicClient.decodeEventLog({
-              abi: CoinFlipETHABI.abi,
+              abi: CoinFlipETHABI,
               data: log.data,
               topics: log.topics,
             });
@@ -166,8 +167,8 @@ const CoinFlipPage = () => {
         const actualSide = gameSettledEvent.args.result === 0 ? "heads" : "tails";
         setFlipResult({ outcome: gameResult, side: actualSide });
         console.log(`Game result: ${gameResult}, actual side: ${actualSide}`);
-        fetchEthBalance();
-        fetchGameHistory();
+        fetchEthBalance(); // Now correctly calls the function defined in component scope
+        fetchGameHistory(); // Now correctly calls the function defined in component scope
       } else {
         console.error("GameSettled event not found in transaction receipt.");
         setError("Could not determine game outcome from transaction.");
@@ -248,21 +249,10 @@ const CoinFlipPage = () => {
           value={wager} 
           onChange={(e) => setWager(e.target.value)} 
           min="0.001" 
-          max="0.1" 
+          max="0.1" // Consider fetching these limits from contract
           step="0.001" 
           className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-purple-500 focus:border-purple-500"
         />
-        <div className="mt-2 flex justify-center space-x-2">
-          {presetWagers.map(pw => (
-            <button 
-              key={pw} 
-              onClick={() => setWager(pw)} 
-              className={`px-3 py-1 rounded text-xs ${wager === pw ? "bg-purple-500 text-white" : "bg-gray-600 hover:bg-gray-500"}`}
-            >
-              {pw} ETH
-            </button>
-          ))}
-        </div>
       </div>
 
       <button 

@@ -43,7 +43,7 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "https://api.testnet.abs.xyz",
+  "proxy": "https://api.testnet.abs.xyz"
 
   "devDependencies": {
     "ajv": "^8.17.1",

@@ -2,7 +2,10 @@
 // This version corrects how accountData is accessed from the SDK hook.
 // It assumes useGlobalWalletSignerAccount() directly returns the account object.
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { useGlobalWalletSignerAccount, useLoginWithAbstract } from "@abstract-foundation/agw-react";
+import {
+  useGlobalWalletSignerAccount,
+  useLoginWithAbstract,
+} from "../../node_modules/@abstract-foundation/agw-react/dist/types/exports";
 
 const WalletContext = createContext({
   walletAddress: null,
