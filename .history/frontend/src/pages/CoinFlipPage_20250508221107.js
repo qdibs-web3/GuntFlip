@@ -126,21 +126,11 @@ const CoinFlipPage = () => {
   }, [fetchGameHistory]);
 
   const handleDegen = async () => {
-    setError(""); 
+    setError("");
     setFlipResult(null);
-    
-    if (!walletAddress) {
-      setError("Connect wallet first.");
-      setTimeout(() => setError(""), 3000); // Error disappears after 3 seconds
-      return;
-    }
-  
-    if (!selectedSide) {
-      setError("Select heads or tails.");
-      setTimeout(() => setError(""), 3000); // Error disappears after 3 seconds
-      return;
-    }
-  
+    if (!walletAddress) return setError("Connect wallet first.");
+    if (!selectedSide) return setError("Select heads or tails.");
+
     let minWagerEth, maxWagerEth;
     try {
       minWagerEth = formatEther(
@@ -160,32 +150,29 @@ const CoinFlipPage = () => {
     } catch (e) {
       console.error("Could not fetch wager limits", e);
       setError("Could not fetch wager limits. Using defaults.");
-      setTimeout(() => setError(""), 3000); // Error disappears after 3 seconds
       minWagerEth = "0.001";
       maxWagerEth = "0.1";
     }
-  
+
     if (
       !wager ||
       parseFloat(wager) < parseFloat(minWagerEth) ||
       parseFloat(wager) > parseFloat(maxWagerEth)
     ) {
-      setError(
+      return setError(
         `Enter a valid wager between ${minWagerEth} and ${maxWagerEth} ETH.`
       );
-      setTimeout(() => setError(""), 3000); // Error disappears after 3 seconds
-      return;
     }
-  
+
     const walletClient = await getWalletClient();
     if (!walletClient) return;
-  
+
     setIsFlipping(true);
-  
+
     try {
       const wagerInWei = parseEther(wager);
       const choiceAsNumber = selectedSide === "heads" ? 0 : 1;
-  
+
       const flipTxHash = await walletClient.writeContract({
         address: COINFLIP_CONTRACT_ADDRESS,
         abi: CoinFlipETHABI.abi,
@@ -194,11 +181,11 @@ const CoinFlipPage = () => {
         value: wagerInWei,
         account: walletClient.account,
       });
-  
+
       const receipt = await publicClient.waitForTransactionReceipt({
         hash: flipTxHash,
       });
-  
+
       const gameSettledEvent = receipt.logs
         .map((log) => {
           try {
@@ -217,7 +204,7 @@ const CoinFlipPage = () => {
             decodedLog.eventName === "GameSettled" &&
             decodedLog.args.player.toLowerCase() === walletAddress.toLowerCase()
         );
-  
+
       if (gameSettledEvent) {
         const gameResult =
           gameSettledEvent.args.result === choiceAsNumber ? "win" : "loss";
@@ -227,7 +214,6 @@ const CoinFlipPage = () => {
         fetchGameHistory();
       } else {
         setError("Could not determine game outcome from transaction.");
-        setTimeout(() => setError(""), 3000); // Error disappears after 3 seconds
         setFlipResult({ outcome: "unknown", side: "unknown" });
       }
     } catch (err) {
@@ -235,13 +221,11 @@ const CoinFlipPage = () => {
       setError(
         err.shortMessage || err.message || "An error occurred during the flip."
       );
-      setTimeout(() => setError(""), 3000); // Error disappears after 3 seconds
       setFlipResult({ outcome: "error", side: "unknown" });
     } finally {
       setIsFlipping(false);
     }
   };
-  
 
   return (
     <div className="coinflip-container">
@@ -293,20 +277,18 @@ const CoinFlipPage = () => {
         {error && <p className="error-message">{error}</p>}
 
         <div className="coinflip-controls">
-          <div className="side-selection">
-            <button
-              className={selectedSide === "heads" ? "selected" : ""}
-              onClick={() => setSelectedSide("heads")}
-            >
-              Heads
-            </button>
-            <button
-              className={selectedSide === "tails" ? "selected" : ""}
-              onClick={() => setSelectedSide("tails")}
-            >
-              Tails
-            </button>
-          </div>
+        <div className="side-selection">
+          <button
+            className={`side-button ${selectedSide === "heads" ? "selected" : ""}`}
+            onClick={() => setSelectedSide("heads")}
+          >
+          </button>
+          <button
+            className={`side-button ${selectedSide === "tails" ? "selected" : ""}`}
+            onClick={() => setSelectedSide("tails")}
+          >
+          </button>
+        </div>
 
           <div className="wager-input">
             <input
