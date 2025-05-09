@@ -4,6 +4,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 2rem;
   min-height: calc(100vh - 60px); /* Adjust based on Navbar height */
   box-sizing: border-box;
   /* Animated Gradient Background - Copied from LandingPage.css */

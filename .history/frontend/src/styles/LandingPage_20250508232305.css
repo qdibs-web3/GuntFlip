@@ -6,6 +6,7 @@
   align-items: center;
   justify-content: center;
   min-height: calc(100vh - 60px); /* Adjust based on Navbar height */
+  padding: 2rem;
   text-align: center;
   /* Animated Gradient Background */
   background: linear-gradient(45deg, #031a03, #08dc74, #031a03, #09dc99);

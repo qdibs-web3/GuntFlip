@@ -1,0 +1,36 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%; /* Ensure root takes full height */
+  overflow-x: hidden; /* Prevent horizontal scroll */
+  background-color: #08dc74; /* Dark green matrix background */
+}
+
+body {
+  font-family: 'Courier New', Courier, monospace; /* Matrix-like font */
+  background-color: #08dc74; /* Dark green matrix background */
+  color: #00ff41; /* Bright green matrix text */
+  line-height: 1.6;
+}
+
+a {
+  color: #39ff14; /* Neon green for links */
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  font-family: inherit; /* Inherit matrix font */
+  cursor: pointer;
+}
