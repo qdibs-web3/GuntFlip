@@ -63,7 +63,7 @@
   border-color: red;
 }
 
-.connect-button1 {
+.connect-button {
   background-color: transparent;
   border: 1px solid #00ff41;
   color: #00ff41;
@@ -76,7 +76,7 @@
   font-family: inherit;
 }
 
-.connect-button1:hover {
+.connect-button:hover {
   background-color: rgba(0, 255, 65, 0.1);
   box-shadow: 0 0 8px rgba(0, 255, 65, 0.5);
 }

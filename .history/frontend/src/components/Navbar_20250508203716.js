@@ -46,7 +46,7 @@ const Navbar = () => {
 
         {!isConnecting && !isLoading && !error && !walletAddress && (
           <button
-            className="connect-button1"
+            className="connect-button"
             onClick={handleConnect}
             disabled={isConnecting || isLoading}
           >

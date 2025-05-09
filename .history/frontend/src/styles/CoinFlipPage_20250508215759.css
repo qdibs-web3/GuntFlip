@@ -26,7 +26,7 @@
   width: 100%;
   height: auto;
   position: absolute;
-  top: 8px;
+  top: 20px;
   left: 20px;
 }
 
@@ -400,9 +400,8 @@
   display: flex;
   justify-content: center; /* centers horizontally */
   align-items: center;     /* centers vertically */
-  height: 300px;           /* or whatever height fits your layout */
+  height: 350px;           /* or whatever height fits your layout */
   position: relative;
-  margin-bottom: -150px;
 }
 
 .coin-placeholder {

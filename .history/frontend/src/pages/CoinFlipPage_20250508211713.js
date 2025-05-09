@@ -17,7 +17,6 @@ import coinImage from "../assets/heads.png";
 import headsImage from "../assets/heads.png";
 import tailsImage from "../assets/tails.png";
 import "../styles/CoinFlipPage.css";
-import logo from '../assets/nav.png';
 
 const CoinFlipPage = () => {
   const {
@@ -27,6 +26,7 @@ const CoinFlipPage = () => {
     isLoading: isWalletLoading,
     error: walletError,
     connect,
+    disconnect,
   } = useWallet();
 
   const [selectedSide, setSelectedSide] = useState(null);
@@ -230,12 +230,12 @@ const CoinFlipPage = () => {
   return (
     <div className="coinflip-container">
       <div className="coinflip-box">
-        <img src={logo} alt="GuntFlip ETH" className="page-title" />
+        <h1 className="page-title">GuntFlip ETH</h1>
 
         {walletAddress ? (
           <div className="wallet-info-active">
             <p>
-              Connected: <span className="wallet-address">{walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</span>
+              Connected: <span className="wallet-address">{walletAddress}</span>
             </p>
             <p>
               Balance:{" "}
@@ -243,6 +243,9 @@ const CoinFlipPage = () => {
                 {parseFloat(ethBalance).toFixed(4)} ETH
               </span>
             </p>
+            <button onClick={disconnect} className="disconnect-button">
+              Disconnect
+            </button>
           </div>
         ) : (
           <button
@@ -270,7 +273,7 @@ const CoinFlipPage = () => {
               className="coin-image"
             />
           ) : (
-            <div className="coin-placeholder">Make your Wager Degen!</div>
+            <div className="coin-placeholder">Select a side and wager</div>
           )}
         </div>
 
@@ -309,11 +312,11 @@ const CoinFlipPage = () => {
           </div>
 
           <button
-            className="degen-button"
+            className="flip-coin"
             onClick={handleDegen}
             disabled={isFlipping}
           >
-            {isFlipping ? "Flipping..." : "Degen"}
+            {isFlipping ? "Flipping..." : "Flip Coin"}
           </button>
         </div>
 

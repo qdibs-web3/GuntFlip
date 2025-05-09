@@ -21,15 +21,6 @@
   100% { background-position: 0% 50%; }
 }
 
-.page-title {
-  max-width: 250px;
-  width: 100%;
-  height: auto;
-  position: absolute;
-  top: 8px;
-  left: 20px;
-}
-
 .wallet-warning {
   color: #00ff41; /* Matrix green text */
   font-size: 1.25rem;
@@ -53,7 +44,6 @@
   gap: 1.5rem;
   color: #00ff41; /* Matrix green text */
   box-shadow: 0 0 20px rgba(0, 255, 65, 0.4);
-  position: relative;
 }
 
 .box-header {
@@ -173,32 +163,23 @@
   box-shadow: 0 0 15px rgba(0, 255, 65, 0.8);
 }
 
-
 .coinflip-controls {
   display: flex;
-  flex-direction: column;
-  gap: 25px;
-  padding: 30px;
-  max-width: 500px;
-  margin: 40px auto;
-  background-color: #1e1e1e;
-  border-radius: 16px;
-  box-shadow: 0 0 20px rgba(0, 255, 120, 0.2);
-  color: white;
-  font-family: 'Segoe UI', sans-serif;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
 }
 
 .side-selection {
   display: flex;
-  justify-content: center;
   gap: 20px;
 }
 
 .side-selection button {
   padding: 12px 24px;
   border: 2px solid #ccc;
-  background-color: #2a2a2a;
-  color: #f0f0f0;
+  background-color: #f8f8f8;
+  color: #333;
   font-size: 16px;
   font-weight: bold;
   border-radius: 8px;
@@ -207,231 +188,30 @@
 }
 
 .side-selection button:hover {
-  background-color: #3c3c3c;
-  border-color: #888;
+  background-color: #e6e6e6;
+  border-color: #999;
 }
 
 .side-selection button.selected {
   background-color: #4caf50;
   color: white;
   border-color: #4caf50;
-  box-shadow: 0 0 10px rgba(76, 175, 80, 0.7);
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.6);
 }
 
-.wager-input {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.wager-input input {
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  background-color: #2e2e2e;
-  color: #fff;
-  font-size: 16px;
-  outline: none;
-}
-
-.wager-input input::placeholder {
-  color: #aaa;
-}
-
-.preset-wagers {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.preset-wagers button {
-  padding: 8px 16px;
-  background-color: #444;
-  color: white;
-  border: 1px solid #666;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.3s ease;
-}
-
-.preset-wagers button:hover {
-  background-color: #5a5a5a;
-}
-
-.degen-button {
-  padding: 14px 28px;
-  font-size: 24px;
-  font-weight: bold;
-  background-color: #00ff41;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.degen-button:hover:not(:disabled) {
-  background-color: #00a529;
-  transform: scale(1.05);
-}
-
-.degen-button:disabled {
-  background-color: #888;
-  cursor: not-allowed;
-}
-
-/* Responsive */
+/* Responsive tweaks */
 @media (max-width: 600px) {
-  .coinflip-controls {
-    padding: 20px;
-  }
-
   .side-selection {
     flex-direction: column;
-    align-items: center;
+    gap: 10px;
   }
 
-  .preset-wagers {
-    justify-content: center;
-  }
-}
-
-
-/* Updated wallet-info-active */
-.wallet-info-active {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background-color: #2a2a2a;
-  padding: 15px 20px;
-  border-radius: 10px;
-  color: #f0f0f0;
-  max-width: 300px;
-  text-align: center;
-  box-shadow: 0 0 10px rgba(0, 255, 200, 0.2);
-  margin: 0; /* Remove margin since it's now absolutely positioned */
-}
-
-
-.wallet-info-active p {
-  margin: 8px 0;
-  font-size: 16px;
-}
-
-.wallet-address {
-  color: #4caf50;
-  font-weight: bold;
-}
-
-.balance-info {
-  color: #00e5ff;
-  font-weight: bold;
-}
-
-.connect-wallet-button {
-  background-color: #4a90e2;
-  color: white;
-  padding: 12px 24px;
-  font-size: 16px;
-  font-weight: bold;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin: 20px auto;
-  display: block;
-}
-
-.connect-wallet-button:hover:not(:disabled) {
-  background-color: #357ab8;
-}
-
-.connect-wallet-button:disabled {
-  background-color: #888;
-  cursor: not-allowed;
-}
-
-/* Wallet Error */
-.wallet-warning {
-  color: #ff4c4c;
-  background-color: #2e1e1e;
-  padding: 10px 15px;
-  border-left: 4px solid red;
-  border-radius: 6px;
-  max-width: 400px;
-  margin: 10px auto;
-  font-size: 14px;
-}
-
-/* Coin Display */
-.coin-display-area {
-  margin: 30px auto;
-  text-align: center;
-  min-height: 180px;
-  max-width: 300px;
-}
-
-.coin-flipping-animation {
-  animation: flip-spin 1s infinite linear;
-  display: inline-block;
-}
-
-@keyframes flip-spin {
-  0% {
-    transform: rotateY(0deg);
-  }
-  50% {
-    transform: rotateY(180deg);
-  }
-  100% {
-    transform: rotateY(360deg);
+  .side-selection button {
+    width: 100%;
   }
 }
 
-.coin-image {
-  width: 150px;
-  height: 150px;
-  object-fit: contain;
-  transition: transform 0.5s ease;
-}
 
-.coin-display-area {
-  display: flex;
-  justify-content: center; /* centers horizontally */
-  align-items: center;     /* centers vertically */
-  height: 300px;           /* or whatever height fits your layout */
-  position: relative;
-  margin-bottom: -150px;
-}
-
-.coin-placeholder {
-  color: #00ff62;
-  font-size: 20px;
-  padding: 20px;
-  background-color: #1f1f1f;
-  border-radius: 10px;
-  font-weight: bolder;
-  text-align: center;
-}
-
-/* Responsive */
-@media (max-width: 600px) {
-  .wallet-info-active,
-  .wallet-warning,
-  .connect-wallet-button {
-    width: 90%;
-  }
-
-  .coin-image {
-    width: 120px;
-    height: 120px;
-  }
-
-  .coin-placeholder {
-    font-size: 14px;
-  }
-}
 
 
 

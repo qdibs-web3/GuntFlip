@@ -21,15 +21,6 @@
   100% { background-position: 0% 50%; }
 }
 
-.page-title {
-  max-width: 250px;
-  width: 100%;
-  height: auto;
-  position: absolute;
-  top: 8px;
-  left: 20px;
-}
-
 .wallet-warning {
   color: #00ff41; /* Matrix green text */
   font-size: 1.25rem;
@@ -396,23 +387,12 @@
   transition: transform 0.5s ease;
 }
 
-.coin-display-area {
-  display: flex;
-  justify-content: center; /* centers horizontally */
-  align-items: center;     /* centers vertically */
-  height: 300px;           /* or whatever height fits your layout */
-  position: relative;
-  margin-bottom: -150px;
-}
-
 .coin-placeholder {
-  color: #00ff62;
-  font-size: 20px;
+  color: #aaa;
+  font-size: 16px;
   padding: 20px;
   background-color: #1f1f1f;
   border-radius: 10px;
-  font-weight: bolder;
-  text-align: center;
 }
 
 /* Responsive */

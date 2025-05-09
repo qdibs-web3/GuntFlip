@@ -38,7 +38,7 @@ const Navbar = () => {
             <span className="wallet-address-display">
               {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
             </span>
-            <button className="connect-button1 disconnect-button" onClick={handleDisconnect}>
+            <button className="connect-button disconnect-button" onClick={handleDisconnect}>
               Disconnect
             </button>
           </div>
@@ -46,7 +46,7 @@ const Navbar = () => {
 
         {!isConnecting && !isLoading && !error && !walletAddress && (
           <button
-            className="connect-button1"
+            className="connect-button"
             onClick={handleConnect}
             disabled={isConnecting || isLoading}
           >

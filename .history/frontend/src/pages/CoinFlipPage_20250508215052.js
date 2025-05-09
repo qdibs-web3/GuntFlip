@@ -17,7 +17,6 @@ import coinImage from "../assets/heads.png";
 import headsImage from "../assets/heads.png";
 import tailsImage from "../assets/tails.png";
 import "../styles/CoinFlipPage.css";
-import logo from '../assets/nav.png';
 
 const CoinFlipPage = () => {
   const {
@@ -230,7 +229,7 @@ const CoinFlipPage = () => {
   return (
     <div className="coinflip-container">
       <div className="coinflip-box">
-        <img src={logo} alt="GuntFlip ETH" className="page-title" />
+        <img src="/path/to/your/logo.png" alt="GuntFlip ETH" className="page-title" />
 
         {walletAddress ? (
           <div className="wallet-info-active">
