@@ -297,12 +297,14 @@ const CoinFlipPage = () => {
           <button
             className={selectedSide === "heads" ? "selected" : ""}
             onClick={() => setSelectedSide("heads")}
+            disabled={!!error} // Disable button if there is an error
           >
             Heads
           </button>
           <button
             className={selectedSide === "tails" ? "selected" : ""}
             onClick={() => setSelectedSide("tails")}
+            disabled={!!error} // Disable button if there is an error
           >
             Tails
           </button>

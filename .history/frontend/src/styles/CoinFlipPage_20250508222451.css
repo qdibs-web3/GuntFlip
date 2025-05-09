@@ -36,12 +36,6 @@
   font-weight: bolder;
 }
 
-.game-history{
-  text-align: center;
-  font-size: 24px;
-  font-weight: bolder;
-}
-
 .wallet-warning {
   color: #00ff41; /* Matrix green text */
   font-size: 1.25rem;
@@ -114,6 +108,7 @@
   gap: 2rem;
   flex-wrap: wrap;
 }
+
 
 
 .degen-button {
@@ -247,7 +242,6 @@
 @media (max-width: 600px) {
   .coinflip-controls {
     padding: 20px;
-    margin-top: 130px;
   }
 
   .side-selection {
@@ -383,11 +377,7 @@
   .wallet-info-active,
   .wallet-warning,
   .connect-wallet-button {
-    top: 140px;
-    right: 15%;
-    padding: 10px 15px;
-    font-size: 14px;
-    max-width: 90vw;
+    width: 90%;
   }
 
   .coin-image {
@@ -397,9 +387,10 @@
 
   .coin-placeholder {
     font-size: 14px;
-    margin-top: 160px;
   }
 }
+
+
 
 
 /* Responsive Styles */

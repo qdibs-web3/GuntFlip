@@ -247,7 +247,6 @@
 @media (max-width: 600px) {
   .coinflip-controls {
     padding: 20px;
-    margin-top: 130px;
   }
 
   .side-selection {
@@ -383,7 +382,7 @@
   .wallet-info-active,
   .wallet-warning,
   .connect-wallet-button {
-    top: 140px;
+    top: 100px;
     right: 15%;
     padding: 10px 15px;
     font-size: 14px;
@@ -397,9 +396,10 @@
 
   .coin-placeholder {
     font-size: 14px;
-    margin-top: 160px;
   }
 }
+
+
 
 
 /* Responsive Styles */
