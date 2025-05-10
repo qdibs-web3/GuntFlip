@@ -7,7 +7,6 @@ import {
   custom,
   parseEther,
   formatEther,
-  decodeEventLog, // Added decodeEventLog to imports
 } from "viem";
 import {
   COINFLIP_CONTRACT_ADDRESS,
@@ -96,7 +95,7 @@ const CoinFlipPage = () => {
       }
       const logs = await publicClient.getLogs({
         address: COINFLIP_CONTRACT_ADDRESS,
-        event: gameSettledEventAbi, 
+        event: gameSettledEventAbi, // This uses the ABI object directly
         args: { player: walletAddress },
         fromBlock: "earliest",
         toBlock: "latest",
@@ -106,6 +105,8 @@ const CoinFlipPage = () => {
         .filter(log => log.args && log.args.hasOwnProperty("gameId") && log.args.hasOwnProperty("result") && log.args.hasOwnProperty("payoutAmount"))
         .map((log) => {
           const payout = formatEther(log.args.payoutAmount);
+          // Wager and playerChoice are not directly in GameSettled event.
+          // The contract"s GameSettled event: event GameSettled(uint256 indexed gameId, address indexed player, CoinSide result, uint256 payoutAmount, uint256 feeAmount);
           return {
             gameId: log.args.gameId.toString(),
             result: log.args.result === 0 ? "Heads" : "Tails",
@@ -117,6 +118,7 @@ const CoinFlipPage = () => {
       setGameHistory(history.slice(0, 10));
     } catch (err) {
       console.error("Error fetching game history:", err);
+      // setError("Could not fetch game history."); // Avoid overwriting more critical errors
     }
   }, [publicClient, walletAddress]);
 
@@ -126,7 +128,7 @@ const CoinFlipPage = () => {
 
   useEffect(() => {
     fetchGameHistory();
-    const interval = setInterval(fetchGameHistory, 30000); 
+    const interval = setInterval(fetchGameHistory, 30000); // Poll for history updates
     return () => clearInterval(interval);
   }, [fetchGameHistory]);
 
@@ -166,8 +168,8 @@ const CoinFlipPage = () => {
       console.error("Could not fetch wager limits", e);
       setError("Could not fetch wager limits. Using defaults.");
       setTimeout(() => setError(""), 3000);
-      minWagerEth = "0.001"; 
-      maxWagerEth = "0.1"; 
+      minWagerEth = "0.001"; // Default fallback
+      maxWagerEth = "0.1"; // Default fallback
     }
 
     if (
@@ -186,7 +188,7 @@ const CoinFlipPage = () => {
     if (!walletClient) return;
 
     setIsSubmittingTransaction(true);
-    const currentWagerForFlip = wager; 
+    const currentWagerForFlip = wager; // Capture wager at the time of flip
 
     try {
       const wagerInWei = parseEther(currentWagerForFlip);
@@ -198,7 +200,7 @@ const CoinFlipPage = () => {
         functionName: "flip",
         args: [choiceAsNumber],
         value: wagerInWei,
-        account: walletClient.account, 
+        account: walletClient.account, // Ensure account is passed if viem version requires it explicitly
       });
 
       const receipt = await publicClient.waitForTransactionReceipt({
@@ -206,52 +208,46 @@ const CoinFlipPage = () => {
       });
 
       setIsSubmittingTransaction(false);
-      setIsFlipping(true); 
+      setIsFlipping(true); // Start animation after transaction is mined
 
+      // Simulate coin spinning duration
       await new Promise(resolve => setTimeout(resolve, 3000));
 
       let gameSettledEventData = null;
-      let gameSettledEventFound = false; 
-
-      console.log("Attempting to find GameSettled event in receipt logs:", receipt.logs);
-
+      // Iterate through logs to find and decode the GameSettled event
+      // The contract"s GameSettled event: event GameSettled(uint256 indexed gameId, address indexed player, CoinSide result, uint256 payoutAmount, uint256 feeAmount);
       for (const log of receipt.logs) {
         try {
-          // Corrected: Use imported decodeEventLog utility
-          const decodedLog = decodeEventLog({
-            abi: CoinFlipETHABI.abi,
+          const decodedLog = publicClient.decodeEventLog({
+            abi: CoinFlipETHABI.abi, // Ensure this ABI accurately reflects the contract
             data: log.data,
             topics: log.topics,
           });
 
-          if (decodedLog) {
-            console.log("Successfully decoded a log entry:", decodedLog.eventName, "Args:", decodedLog.args);
-            if (
-              decodedLog.eventName === "GameSettled" &&
-              decodedLog.args.player &&
-              decodedLog.args.player.toLowerCase() === walletAddress.toLowerCase() &&
-              decodedLog.args.hasOwnProperty("result") &&
-              decodedLog.args.hasOwnProperty("payoutAmount")
-            ) {
-              gameSettledEventData = decodedLog.args;
-              gameSettledEventFound = true;
-              console.log("GameSettled event FOUND and matched player:", gameSettledEventData);
-              break;
-            }
-          } else {
-            console.log("decodeEventLog returned null/undefined for a log. Raw log:", log);
+          if (
+            decodedLog &&
+            decodedLog.eventName === "GameSettled" &&
+            decodedLog.args.player && 
+            decodedLog.args.player.toLowerCase() === walletAddress.toLowerCase() &&
+            decodedLog.args.hasOwnProperty("result") && 
+            decodedLog.args.hasOwnProperty("payoutAmount")
+          ) {
+            gameSettledEventData = decodedLog.args;
+            break; // Found the relevant event
           }
         } catch (e) {
-          console.warn("Error decoding a log entry. Raw log:", log, "Error:", e);
+          // console.warn("Could not decode a log entry during flip processing:", e, log);
+          continue; // Skip logs that don"t match or can"t be decoded
         }
       }
 
-      if (gameSettledEventFound) {
+      if (gameSettledEventData) {
         const gameResultOutcome =
           gameSettledEventData.result === choiceAsNumber ? "win" : "loss";
         const actualSide = gameSettledEventData.result === 0 ? "heads" : "tails";
         const payoutAmount = formatEther(gameSettledEventData.payoutAmount);
-        const wageredAmountDisplay = currentWagerForFlip;
+        // Wagered amount is currentWagerForFlip, as GameSettled event doesn"t include it.
+        const wageredAmountDisplay = currentWagerForFlip; 
         
         setFlipResult({
           outcome: gameResultOutcome,
@@ -259,11 +255,11 @@ const CoinFlipPage = () => {
           wagered: wageredAmountDisplay,
           payout: payoutAmount,
         });
-        fetchEthBalance();
-        fetchGameHistory();
+        fetchEthBalance(); // Update balance after game
+        fetchGameHistory(); // Update history after game
       } else {
-        console.error("GameSettled event was NOT found or not correctly decoded for player:", walletAddress, "Full transaction receipt:", receipt, "All raw logs from receipt:", receipt.logs);
-        setError("Could not determine game outcome. Please ensure your ABI (CoinFlipETH.json) is up-to-date. Check browser console for detailed logs.");
+        console.error("GameSettled event not found or not correctly decoded for player:", walletAddress, "in receipt:", receipt);
+        setError("Could not determine game outcome from this transaction. Please ensure your ABI (CoinFlipETH.json) is up-to-date with the smart contract"s GameSettled event definition.");
         setFlipResult({ outcome: "unknown", side: "unknown", wagered: currentWagerForFlip, payout: "0" });
       }
     } catch (err) {
@@ -273,144 +269,143 @@ const CoinFlipPage = () => {
       );
       setFlipResult({ outcome: "error", side: "unknown", wagered: currentWagerForFlip, payout: "0" });
       if (isSubmittingTransaction) {
-        setIsSubmittingTransaction(false);
+        setIsSubmittingTransaction(false); // Ensure this is reset on error
       }
     } finally {
-      setIsFlipping(false);
+      setIsFlipping(false); // Stop animation regardless of outcome
     }
   };
-// End of Part 1
-return (
-  <div className="coinflip-container">
-    <div className="coinflip-box">
-      <img src={logo} alt="GuntFlip ETH" className="page-title" />
+  return (
+    <div className="coinflip-container">
+      <div className="coinflip-box">
+        <img src={logo} alt="GuntFlip ETH" className="page-title" />
 
-      {walletAddress ? (
-        <div className="wallet-info-active">
-          <p>
-            Connected: <span className="wallet-address">{walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</span>
-          </p>
-          <p>
-            Balance:{" "}
-            <span className="balance-info">
-              {parseFloat(ethBalance).toFixed(4)} ETH
-            </span>
-          </p>
-        </div>
-      ) : (
-        <button
-          onClick={connect}
-          disabled={isConnecting || isWalletLoading}
-          className="connect-wallet-button"
-        >
-          {isConnecting || isWalletLoading ? "Connecting..." : "Connect Wallet"}
-        </button>
-      )}
-
-      {walletError && (
-        <p className="wallet-warning">Wallet Error: {walletError.message}</p>
-      )}
-
-      <div className="coin-display-area">
-        {isFlipping ? (
-          <div className="coin-flipping-animation">
-            <img src={coinImage} alt="Flipping Coin" className="coin-image" />
+        {walletAddress ? (
+          <div className="wallet-info-active">
+            <p>
+              Connected: <span className="wallet-address">{walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</span>
+            </p>
+            <p>
+              Balance:{" "}
+              <span className="balance-info">
+                {parseFloat(ethBalance).toFixed(4)} ETH
+              </span>
+            </p>
           </div>
-        ) : flipResult ? (
-          <div className="flip-result-display">
-            <img
-              src={flipResult.side === "heads" ? headsImage : tailsImage}
-              alt={flipResult.side}
-              className="coin-image"
+        ) : (
+          <button
+            onClick={connect}
+            disabled={isConnecting || isWalletLoading}
+            className="connect-wallet-button"
+          >
+            {isConnecting || isWalletLoading ? "Connecting..." : "Connect Wallet"}
+          </button>
+        )}
+
+        {walletError && (
+          <p className="wallet-warning">Wallet Error: {walletError.message}</p>
+        )}
+
+        <div className="coin-display-area">
+          {isFlipping ? (
+            <div className="coin-flipping-animation">
+              <img src={coinImage} alt="Flipping Coin" className="coin-image" />
+            </div>
+          ) : flipResult ? (
+            <div className="flip-result-display">
+              <img
+                src={flipResult.side === "heads" ? headsImage : tailsImage}
+                alt={flipResult.side}
+                className="coin-image"
+              />
+              {flipResult.outcome === "win" && (
+                <p className="win-message">
+                  You Won! Wagered: {flipResult.wagered} ETH, Payout: {flipResult.payout} ETH
+                </p>
+              )}
+              {flipResult.outcome === "loss" && (
+                <p className="loss-message">
+                  You Lost. Wagered: {flipResult.wagered} ETH
+                </p>
+              )}
+              {flipResult.outcome === "unknown" && (
+                <p className="unknown-message">
+                  Outcome Unknown. Wagered: {flipResult.wagered} ETH. Check console for details.
+                </p>
+              )}
+               {flipResult.outcome === "error" && (
+                <p className="error-message-result">
+                  Flip Error. Wagered: {flipResult.wagered} ETH. Check console for details.
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="coin-placeholder">Make your coin flip bet!</div>
+          )}
+        </div>
+
+        {error && <p className="error-message">{error}</p>}
+
+        <div className="coinflip-controls">
+          <div className="side-selection">
+            <button
+              className={selectedSide === "heads" ? "selected" : ""}
+              onClick={() => setSelectedSide("heads")}
+            >
+              Heads
+            </button>
+            <button
+              className={selectedSide === "tails" ? "selected" : ""}
+              onClick={() => setSelectedSide("tails")}
+            >
+              Tails
+            </button>
+          </div>
+
+          <div className="wager-input">
+            <input
+              type="number"
+              value={wager}
+              onChange={(e) => setWager(e.target.value)}
+              placeholder="Enter wager in ETH"
+              step="0.001"
+              min={presetWagers[0]} // A suggestion, actual min comes from contract
             />
-            {flipResult.outcome === "win" && (
-              <p className="win-message">
-                You Won! Wagered: {flipResult.wagered} ETH, Payout: {flipResult.payout} ETH
-              </p>
-            )}
-            {flipResult.outcome === "loss" && (
-              <p className="loss-message">
-                You Lost. Wagered: {flipResult.wagered} ETH
-              </p>
-            )}
-            {flipResult.outcome === "unknown" && (
-              <p className="unknown-message">
-                Outcome Unknown. Wagered: {flipResult.wagered} ETH. Check console for details.
-              </p>
-            )}
-             {flipResult.outcome === "error" && (
-              <p className="error-message-result">
-                Flip Error. Wagered: {flipResult.wagered} ETH. Check console for details.
-              </p>
-            )}
+            <div className="preset-wagers">
+              {presetWagers.map((amount) => (
+                <button key={amount} onClick={() => setWager(amount)}>
+                  {amount} ETH
+                </button>
+              ))}
+            </div>
           </div>
-        ) : (
-          <div className="coin-placeholder">Make your coin flip bet!</div>
-        )}
-      </div>
 
-      {error && <p className="error-message">{error}</p>}
-
-      <div className="coinflip-controls">
-        <div className="side-selection">
           <button
-            className={selectedSide === "heads" ? "selected" : ""}
-            onClick={() => setSelectedSide("heads")}
+            className="degen-button"
+            onClick={handleDegen}
+            disabled={isSubmittingTransaction || isFlipping}
           >
-            Heads
-          </button>
-          <button
-            className={selectedSide === "tails" ? "selected" : ""}
-            onClick={() => setSelectedSide("tails")}
-          >
-            Tails
+            {isSubmittingTransaction ? "Confirming..." : isFlipping ? "Flipping..." : "Degen Flip!"}
           </button>
         </div>
 
-        <div className="wager-input">
-          <input
-            type="number"
-            value={wager}
-            onChange={(e) => setWager(e.target.value)}
-            placeholder="Enter wager in ETH"
-            step="0.001"
-            min={presetWagers[0]} // A suggestion, actual min comes from contract
-          />
-          <div className="preset-wagers">
-            {presetWagers.map((amount) => (
-              <button key={amount} onClick={() => setWager(amount)}>
-                {amount} ETH
-              </button>
-            ))}
-          </div>
+        <div className="game-history">
+          <h3>Last 10 Games</h3>
+          {gameHistory.length > 0 ? (
+            <ul>
+              {gameHistory.map((game) => (
+                <li key={game.gameId} className={game.won ? "win-history" : "loss-history"}>
+                  Game #{game.gameId}: Result: {game.result} — {game.won ? `✅ Won ${game.payout} ETH` : `❌ Loss (Payout: ${game.payout} ETH)`}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No game history yet.</p>
+          )}
         </div>
-
-        <button
-          className="degen-button"
-          onClick={handleDegen}
-          disabled={isSubmittingTransaction || isFlipping}
-        >
-          {isSubmittingTransaction ? "Confirming..." : isFlipping ? "Flipping..." : "Degen Flip!"}
-        </button>
-      </div>
-
-      <div className="game-history">
-        <h3>Last 10 Games</h3>
-        {gameHistory.length > 0 ? (
-          <ul>
-            {gameHistory.map((game) => (
-              <li key={game.gameId} className={game.won ? "win-history" : "loss-history"}>
-                Game #{game.gameId}: Result: {game.result} — {game.won ? `✅ Won ${game.payout} ETH` : `❌ Loss (Payout: ${game.payout} ETH)`}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No game history yet.</p>
-        )}
       </div>
     </div>
-  </div>
-);
+  );
 };
 
 export default CoinFlipPage;

@@ -279,139 +279,139 @@ const CoinFlipPage = () => {
       setIsFlipping(false);
     }
   };
-// End of Part 1
-return (
-  <div className="coinflip-container">
-    <div className="coinflip-box">
-      <img src={logo} alt="GuntFlip ETH" className="page-title" />
+  return (
+    <div className="coinflip-container">
+      <div className="coinflip-box">
+        <img src={logo} alt="GuntFlip ETH" className="page-title" />
 
-      {walletAddress ? (
-        <div className="wallet-info-active">
-          <p>
-            Connected: <span className="wallet-address">{walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</span>
-          </p>
-          <p>
-            Balance:{" "}
-            <span className="balance-info">
-              {parseFloat(ethBalance).toFixed(4)} ETH
-            </span>
-          </p>
-        </div>
-      ) : (
-        <button
-          onClick={connect}
-          disabled={isConnecting || isWalletLoading}
-          className="connect-wallet-button"
-        >
-          {isConnecting || isWalletLoading ? "Connecting..." : "Connect Wallet"}
-        </button>
-      )}
-
-      {walletError && (
-        <p className="wallet-warning">Wallet Error: {walletError.message}</p>
-      )}
-
-      <div className="coin-display-area">
-        {isFlipping ? (
-          <div className="coin-flipping-animation">
-            <img src={coinImage} alt="Flipping Coin" className="coin-image" />
+        {walletAddress ? (
+          <div className="wallet-info-active">
+            <p>
+              Connected: <span className="wallet-address">{walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</span>
+            </p>
+            <p>
+              Balance:{" "}
+              <span className="balance-info">
+                {parseFloat(ethBalance).toFixed(4)} ETH
+              </span>
+            </p>
           </div>
-        ) : flipResult ? (
-          <div className="flip-result-display">
-            <img
-              src={flipResult.side === "heads" ? headsImage : tailsImage}
-              alt={flipResult.side}
-              className="coin-image"
+        ) : (
+          <button
+            onClick={connect}
+            disabled={isConnecting || isWalletLoading}
+            className="connect-wallet-button"
+          >
+            {isConnecting || isWalletLoading ? "Connecting..." : "Connect Wallet"}
+          </button>
+        )}
+
+        {walletError && (
+          <p className="wallet-warning">Wallet Error: {walletError.message}</p>
+        )}
+
+        <div className="coin-display-area">
+          {isFlipping ? (
+            <div className="coin-flipping-animation">
+              <img src={coinImage} alt="Flipping Coin" className="coin-image" />
+            </div>
+          ) : flipResult ? (
+            <div className="flip-result-display">
+              <img
+                src={flipResult.side === "heads" ? headsImage : tailsImage}
+                alt={flipResult.side}
+                className="coin-image"
+              />
+              {flipResult.outcome === "win" && (
+                <p className="win-message">
+                  You Won! Wagered: {flipResult.wagered} ETH, Payout: {flipResult.payout} ETH
+                </p>
+              )}
+              {flipResult.outcome === "loss" && (
+                <p className="loss-message">
+                  You Lost. Wagered: {flipResult.wagered} ETH
+                </p>
+              )}
+              {flipResult.outcome === "unknown" && (
+                <p className="unknown-message">
+                  Outcome Unknown. Wagered: {flipResult.wagered} ETH. Check console for details.
+                </p>
+              )}
+               {flipResult.outcome === "error" && (
+                <p className="error-message-result">
+                  Flip Error. Wagered: {flipResult.wagered} ETH. Check console for details.
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="coin-placeholder">Make your coin flip bet!</div>
+          )}
+        </div>
+
+        {error && <p className="error-message">{error}</p>}
+
+        <div className="coinflip-controls">
+          <div className="side-selection">
+            <button
+              className={selectedSide === "heads" ? "selected" : ""}
+              onClick={() => setSelectedSide("heads")}
+            >
+              Heads
+            </button>
+            <button
+              className={selectedSide === "tails" ? "selected" : ""}
+              onClick={() => setSelectedSide("tails")}
+            >
+              Tails
+            </button>
+          </div>
+
+          <div className="wager-input">
+            <input
+              type="number"
+              value={wager}
+              onChange={(e) => setWager(e.target.value)}
+              placeholder="Enter wager in ETH"
+              step="0.001"
+              min={presetWagers[0]} // A suggestion, actual min comes from contract
             />
-            {flipResult.outcome === "win" && (
-              <p className="win-message">
-                You Won! Wagered: {flipResult.wagered} ETH, Payout: {flipResult.payout} ETH
-              </p>
-            )}
-            {flipResult.outcome === "loss" && (
-              <p className="loss-message">
-                You Lost. Wagered: {flipResult.wagered} ETH
-              </p>
-            )}
-            {flipResult.outcome === "unknown" && (
-              <p className="unknown-message">
-                Outcome Unknown. Wagered: {flipResult.wagered} ETH. Check console for details.
-              </p>
-            )}
-             {flipResult.outcome === "error" && (
-              <p className="error-message-result">
-                Flip Error. Wagered: {flipResult.wagered} ETH. Check console for details.
-              </p>
-            )}
+            <div className="preset-wagers">
+              {presetWagers.map((amount) => (
+                <button key={amount} onClick={() => setWager(amount)}>
+                  {amount} ETH
+                </button>
+              ))}
+            </div>
           </div>
-        ) : (
-          <div className="coin-placeholder">Make your coin flip bet!</div>
-        )}
-      </div>
 
-      {error && <p className="error-message">{error}</p>}
-
-      <div className="coinflip-controls">
-        <div className="side-selection">
           <button
-            className={selectedSide === "heads" ? "selected" : ""}
-            onClick={() => setSelectedSide("heads")}
+            className="degen-button"
+            onClick={handleDegen}
+            disabled={isSubmittingTransaction || isFlipping}
           >
-            Heads
-          </button>
-          <button
-            className={selectedSide === "tails" ? "selected" : ""}
-            onClick={() => setSelectedSide("tails")}
-          >
-            Tails
+            {isSubmittingTransaction ? "Confirming..." : isFlipping ? "Flipping..." : "Degen Flip!"}
           </button>
         </div>
 
-        <div className="wager-input">
-          <input
-            type="number"
-            value={wager}
-            onChange={(e) => setWager(e.target.value)}
-            placeholder="Enter wager in ETH"
-            step="0.001"
-            min={presetWagers[0]} // A suggestion, actual min comes from contract
-          />
-          <div className="preset-wagers">
-            {presetWagers.map((amount) => (
-              <button key={amount} onClick={() => setWager(amount)}>
-                {amount} ETH
-              </button>
-            ))}
-          </div>
+        <div className="game-history">
+          <h3>Last 10 Games</h3>
+          {gameHistory.length > 0 ? (
+            <ul>
+              {gameHistory.map((game) => (
+                <li key={game.gameId} className={game.won ? "win-history" : "loss-history"}>
+                  Game #{game.gameId}: Result: {game.result} — {game.won ? `✅ Won ${game.payout} ETH` : `❌ Loss (Payout: ${game.payout} ETH)`}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No game history yet.</p>
+          )}
         </div>
-
-        <button
-          className="degen-button"
-          onClick={handleDegen}
-          disabled={isSubmittingTransaction || isFlipping}
-        >
-          {isSubmittingTransaction ? "Confirming..." : isFlipping ? "Flipping..." : "Degen Flip!"}
-        </button>
-      </div>
-
-      <div className="game-history">
-        <h3>Last 10 Games</h3>
-        {gameHistory.length > 0 ? (
-          <ul>
-            {gameHistory.map((game) => (
-              <li key={game.gameId} className={game.won ? "win-history" : "loss-history"}>
-                Game #{game.gameId}: Result: {game.result} — {game.won ? `✅ Won ${game.payout} ETH` : `❌ Loss (Payout: ${game.payout} ETH)`}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No game history yet.</p>
-        )}
       </div>
     </div>
-  </div>
-);
+  );
 };
 
 export default CoinFlipPage;
+
 
