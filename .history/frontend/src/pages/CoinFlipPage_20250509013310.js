@@ -31,8 +31,8 @@ const CoinFlipPage = () => {
 
   const [selectedSide, setSelectedSide] = useState(null);
   const [wager, setWager] = useState("0.001");
-  const [isFlipping, setIsFlipping] = useState(false); // For the animation itself
-  const [isSubmittingTransaction, setIsSubmittingTransaction] = useState(false); // For transaction confirmation period
+  const [isFlipping, setIsFlipping] = useState(false);
+  const [isSubmittingTransaction, setIsSubmittingTransaction] = useState(false);
   const [flipResult, setFlipResult] = useState(null);
   const [error, setError] = useState("");
   const [ethBalance, setEthBalance] = useState("0");
@@ -107,7 +107,7 @@ const CoinFlipPage = () => {
           result: log.args.result === 0 ? "Heads" : "Tails",
           wager: formatEther(log.args.wagerAmount),
           payout: formatEther(log.args.payoutAmount),
-          won: log.args.payoutAmount > 0n, // Changed: Removed BigInt() constructor
+          won: log.args.payoutAmount > BigInt(0), // Compare with BigInt 0
         }))
         .reverse();
       setGameHistory(history.slice(0, 10));
@@ -182,10 +182,10 @@ const CoinFlipPage = () => {
     if (!walletClient) return;
 
     setIsSubmittingTransaction(true);
-    const currentWagerForFlip = wager; // Capture wager at the time of flip for use in result/error states
+    const currentWager = wager; // Capture wager at the time of flip
 
     try {
-      const wagerInWei = parseEther(currentWagerForFlip); // Use captured wager
+      const wagerInWei = parseEther(currentWager);
       const choiceAsNumber = selectedSide === "heads" ? 0 : 1;
 
       const flipTxHash = await walletClient.writeContract({
@@ -230,26 +230,26 @@ const CoinFlipPage = () => {
           gameSettledEvent.args.result === choiceAsNumber ? "win" : "loss";
         const actualSide = gameSettledEvent.args.result === 0 ? "heads" : "tails";
         const payoutAmount = formatEther(gameSettledEvent.args.payoutAmount);
-        const wageredAmount = formatEther(gameSettledEvent.args.wagerAmount); // This should match currentWagerForFlip
+        const wageredAmount = formatEther(gameSettledEvent.args.wagerAmount); // This should match currentWager
         
         setFlipResult({
           outcome: gameResultOutcome,
           side: actualSide,
-          wagered: wageredAmount,
-          payout: payoutAmount,
+          wagered: wageredAmount, // Store wagered amount
+          payout: payoutAmount, // Store payout amount
         });
         fetchEthBalance();
         fetchGameHistory();
       } else {
         setError("Could not determine game outcome from transaction.");
-        setFlipResult({ outcome: "unknown", side: "unknown", wagered: currentWagerForFlip, payout: "0" });
+        setFlipResult({ outcome: "unknown", side: "unknown", wagered: currentWager, payout: "0" });
       }
     } catch (err) {
       console.error("Error during flip:", err);
       setError(
         err.shortMessage || err.message || "An error occurred during the flip."
       );
-      setFlipResult({ outcome: "error", side: "unknown", wagered: currentWagerForFlip, payout: "0" });
+      setFlipResult({ outcome: "error", side: "unknown", wagered: currentWager, payout: "0" });
       if (isSubmittingTransaction) {
         setIsSubmittingTransaction(false);
       }
@@ -387,5 +387,4 @@ const CoinFlipPage = () => {
 };
 
 export default CoinFlipPage;
-
 

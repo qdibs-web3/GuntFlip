@@ -107,7 +107,7 @@ const CoinFlipPage = () => {
           result: log.args.result === 0 ? "Heads" : "Tails",
           wager: formatEther(log.args.wagerAmount),
           payout: formatEther(log.args.payoutAmount),
-          won: log.args.payoutAmount > 0n, // Changed: Removed BigInt() constructor
+          won: log.args.payoutAmount > 0,
         }))
         .reverse();
       setGameHistory(history.slice(0, 10));
@@ -182,10 +182,9 @@ const CoinFlipPage = () => {
     if (!walletClient) return;
 
     setIsSubmittingTransaction(true);
-    const currentWagerForFlip = wager; // Capture wager at the time of flip for use in result/error states
 
     try {
-      const wagerInWei = parseEther(currentWagerForFlip); // Use captured wager
+      const wagerInWei = parseEther(wager);
       const choiceAsNumber = selectedSide === "heads" ? 0 : 1;
 
       const flipTxHash = await walletClient.writeContract({
@@ -201,9 +200,10 @@ const CoinFlipPage = () => {
         hash: flipTxHash,
       });
 
-      setIsSubmittingTransaction(false);
-      setIsFlipping(true);
+      setIsSubmittingTransaction(false); // Transaction confirmed
+      setIsFlipping(true); // Start coin spinning animation
 
+      // Wait for 3 seconds for the animation
       await new Promise(resolve => setTimeout(resolve, 3000));
 
       const gameSettledEvent = receipt.logs
@@ -226,35 +226,29 @@ const CoinFlipPage = () => {
         );
 
       if (gameSettledEvent) {
-        const gameResultOutcome =
+        const gameResult =
           gameSettledEvent.args.result === choiceAsNumber ? "win" : "loss";
         const actualSide = gameSettledEvent.args.result === 0 ? "heads" : "tails";
-        const payoutAmount = formatEther(gameSettledEvent.args.payoutAmount);
-        const wageredAmount = formatEther(gameSettledEvent.args.wagerAmount); // This should match currentWagerForFlip
-        
-        setFlipResult({
-          outcome: gameResultOutcome,
-          side: actualSide,
-          wagered: wageredAmount,
-          payout: payoutAmount,
-        });
+        setFlipResult({ outcome: gameResult, side: actualSide });
         fetchEthBalance();
         fetchGameHistory();
       } else {
         setError("Could not determine game outcome from transaction.");
-        setFlipResult({ outcome: "unknown", side: "unknown", wagered: currentWagerForFlip, payout: "0" });
+        // setTimeout(() => setError(""), 3000); // Error will persist until next flip
+        setFlipResult({ outcome: "unknown", side: "unknown" });
       }
     } catch (err) {
       console.error("Error during flip:", err);
       setError(
         err.shortMessage || err.message || "An error occurred during the flip."
       );
-      setFlipResult({ outcome: "error", side: "unknown", wagered: currentWagerForFlip, payout: "0" });
+      // setTimeout(() => setError(""), 3000); // Error will persist until next flip
+      setFlipResult({ outcome: "error", side: "unknown" });
       if (isSubmittingTransaction) {
         setIsSubmittingTransaction(false);
       }
     } finally {
-      setIsFlipping(false);
+      setIsFlipping(false); // Stop animation regardless of outcome
     }
   };
 
@@ -295,33 +289,11 @@ const CoinFlipPage = () => {
               <img src={coinImage} alt="Flipping Coin" className="coin-image" />
             </div>
           ) : flipResult ? (
-            <div className="flip-result-display">
-              <img
-                src={flipResult.side === "heads" ? headsImage : tailsImage}
-                alt={flipResult.side}
-                className="coin-image"
-              />
-              {flipResult.outcome === "win" && (
-                <p className="win-message">
-                  You Won! Wagered: {flipResult.wagered} ETH, Payout: {flipResult.payout} ETH
-                </p>
-              )}
-              {flipResult.outcome === "loss" && (
-                <p className="loss-message">
-                  You Lost. Wagered: {flipResult.wagered} ETH
-                </p>
-              )}
-              {flipResult.outcome === "unknown" && (
-                <p className="unknown-message">
-                  Outcome Unknown. Wagered: {flipResult.wagered} ETH
-                </p>
-              )}
-               {flipResult.outcome === "error" && (
-                <p className="error-message-result">
-                  Flip Error. Wagered: {flipResult.wagered} ETH
-                </p>
-              )}
-            </div>
+            <img
+              src={flipResult.side === "heads" ? headsImage : tailsImage}
+              alt={flipResult.side}
+              className="coin-image"
+            />
           ) : (
             <div className="coin-placeholder">Make your coin flip bet!</div>
           )}
@@ -374,9 +346,9 @@ const CoinFlipPage = () => {
           <h3>Last 10 Games</h3>
           <ul>
             {gameHistory.map((game) => (
-              <li key={game.gameId} className={game.won ? "win-history" : "loss-history"}>
+              <li key={game.gameId}>
                 #{game.gameId}: You chose {game.playerChoice}, Result:{" "}
-                {game.result} — {game.won ? `✅ Won ${game.payout} ETH` : `❌ Lost ${game.wager} ETH`}
+                {game.result} — {game.won ? "✅ Won" : "❌ Lost"} ({game.wager} ETH)
               </li>
             ))}
           </ul>
@@ -387,5 +359,4 @@ const CoinFlipPage = () => {
 };
 
 export default CoinFlipPage;
-
 

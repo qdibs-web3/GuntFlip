@@ -283,7 +283,7 @@
   align-items: center;     /* centers vertically */
   height: 300px;           /* or whatever height fits your layout */
   position: relative;
-  margin-bottom: -100px;
+  margin-bottom: -150px;
 }
 
 .coin-placeholder {

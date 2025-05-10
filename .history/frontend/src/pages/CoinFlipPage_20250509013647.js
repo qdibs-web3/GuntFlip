@@ -107,7 +107,7 @@ const CoinFlipPage = () => {
           result: log.args.result === 0 ? "Heads" : "Tails",
           wager: formatEther(log.args.wagerAmount),
           payout: formatEther(log.args.payoutAmount),
-          won: log.args.payoutAmount > 0n, // Changed: Removed BigInt() constructor
+          won: BigInt(log.args.payoutAmount) > 0n, // Compare with BigInt 0n
         }))
         .reverse();
       setGameHistory(history.slice(0, 10));
