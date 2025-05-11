@@ -30,7 +30,7 @@ const CoinFlipPage = () => {
   const presetWagers = ["0.001", "0.005", "0.01"];
 
   const publicClient = createPublicClient({
-    chain: baseSepoliaChain,
+    chain: abstractTestnetChain,
     transport: http(),
   });
 
@@ -51,7 +51,7 @@ const CoinFlipPage = () => {
       }
       return createWalletClient({
         account: account.address,
-        chain: baseSepoliaChain,
+        chain: abstractTestnetChain,
         transport: custom(provider),
       });
     } catch (err) {

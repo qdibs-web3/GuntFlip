@@ -1,5 +1,8 @@
 import { defineChain } from 'viem';
 
+// Deployed contract address on Base Sepolia Testnet
+export const COINFLIP_CONTRACT_ADDRESS = "0x01CE40BA4b295458dB7c6048115dB3a954f3E209"; // Update if deployed elsewhere
+
 // Base Sepolia Testnet Chain Definition
 export const baseSepoliaChain = defineChain({
   id: 84532,
@@ -18,6 +21,3 @@ export const baseSepoliaChain = defineChain({
   },
   testnet: true,
 });
-
-// Deployed contract address on Base Sepolia Testnet
-export const COINFLIP_CONTRACT_ADDRESS = "0x01CE40BA4b295458dB7c6048115dB3a954f3E209"; 

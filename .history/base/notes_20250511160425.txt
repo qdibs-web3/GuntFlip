@@ -1,0 +1,18 @@
+third web
+
+client: 7f8c19e1d729d08da2b1a29179a940aa
+secret: QOeq9Yh_pRsRHLl54ydpOL5SlCraNthdkWfbQNv1yguKXOBiUhhh418fKRhkNLm0L6llXHLm65U3ag0xSLjitw
+
+Deploying contracts with the account: 0xED946D2F962cF5207E209CE0F16b629A293d0A8F
+Account balance: 49995473845388088
+CoinFlipETH contract deployed to: 0x01CE40BA4b295458dB7c6048115dB3a954f3E209
+
+-----------------------------------------------------
+Deployment complete.
+CoinFlipETH deployed at: 0x01CE40BA4b295458dB7c6048115dB3a954f3E209
+Constructor arguments used:
+  _initialFeeWallet: 0xED946D2F962cF5207E209CE0F16b629A293d0A8F
+  _initialFeePercentage: 500
+  _initialMaxWager (Wei): 100000000000000000
+  _initialMinWager (Wei): 1000000000000000
+-----------------------------------------------------
